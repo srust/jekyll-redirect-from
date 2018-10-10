@@ -16,15 +16,20 @@ module JekyllRedirectFrom
     # site - The Site object
     # from - the (URL) path, relative to the site root to redirect from
     # to   - the relative path or URL which the page should redirect to
-    def self.from_paths(site, from, to)
+    def self.from_paths(site, from, to, relative: false)
       page = RedirectPage.new(site, site.source, "", "redirect.html")
-      page.set_paths(from, to)
+      page.set_paths(from, to, relative)
       page
     end
 
     # Creates a new RedirectPage instance from the path to the given doc
     def self.redirect_from(doc, path)
       RedirectPage.from_paths(doc.site, path, doc.url)
+    end
+
+    # Creates a new RedirectPage instance from the (relative) path to the given doc
+    def self.redirect_from_rel(doc, path)
+      RedirectPage.from_paths(doc.site, path, doc.url, relative: true)
     end
 
     # Creates a new RedirectPage instance from the doc to the given path
@@ -42,14 +47,14 @@ module JekyllRedirectFrom
     #
     # from - the relative path to the redirect page
     # to   - the relative path or absolute URL to the redirect target
-    def set_paths(from, to)
+    def set_paths(from, to, relative)
       @context ||= context
       from = ensure_leading_slash(from)
       data.merge!(
         "permalink" => from,
         "redirect"  => {
           "from" => from,
-          "to"   => to =~ %r!^https?://! ? to : absolute_url(to),
+          "to"   => to =~ %r!^https?://! ? to : relative ? to : absolute_url(to),
         }
       )
     end
