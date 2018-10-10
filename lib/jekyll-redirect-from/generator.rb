@@ -18,6 +18,7 @@ module JekyllRedirectFrom
       (site.docs_to_write + site.pages.dup).each do |doc|
         next unless JekyllRedirectFrom::CLASSES.include?(doc.class)
         generate_redirect_from(doc)
+        generate_redirect_from_rel(doc)
         generate_redirect_to(doc)
       end
 
@@ -32,6 +33,15 @@ module JekyllRedirectFrom
         page = RedirectPage.redirect_from(doc, path)
         doc.site.pages << page
         redirects[page.redirect_from] = page.redirect_to
+      end
+    end
+
+    # For every `redirect_from_rel` entry, generate a redirect page
+    def generate_redirect_from_rel(doc)
+      doc.redirect_from_rel.each do |path|
+        page = RedirectPage.redirect_from_rel(doc, path)
+        doc.site.pages << page
+        redirects[page.redirect_from_rel] = page.redirect_to
       end
     end
 
